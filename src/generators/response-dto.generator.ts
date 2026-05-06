@@ -1,9 +1,7 @@
-import { Project, StructureKind } from "ts-morph";
+import { Project } from "ts-morph";
 import path from "path";
 import fs from "fs";
 import { ModelMeta } from "../types/metadata.types";
-import { mapTsType } from "../utils/map-ts-type.util";
-import { buildSwaggerDecorator } from "../utils/build-swagger-decorator.util";
 import { shouldIncludeRelation } from "../core/relation-resolver";
 import { GeneratorConfig } from "../types/config.types";
 import { buildProperties } from "./helpers/property-builder";
@@ -39,8 +37,19 @@ export function generateResponseDTO(
         namedImports: ["ApiProperty", "ApiPropertyOptional"],
       },
       {
+        moduleSpecifier: "class-validator",
+        namedImports: [
+          "IsString",
+          "IsInt",
+          "IsBoolean",
+          "IsDate",
+          "IsOptional",
+          "IsEnum",
+        ],
+      },
+      {
         moduleSpecifier: "class-transformer",
-        namedImports: ["Expose"],
+        namedImports: ["Exclude"],
       },
     ]);
 
@@ -73,8 +82,8 @@ export function generateResponseDTO(
 
     relationImports.forEach((rel) => {
       sourceFile.addImportDeclaration({
-        moduleSpecifier: `../${rel.toLowerCase()}/create-${rel.toLowerCase()}.dto`,
-        namedImports: [`Create${rel}Dto`],
+        moduleSpecifier: `../${rel.toLowerCase()}/${rel.toLowerCase()}.response.dto`,
+        namedImports: [`${rel}ResponseDto`],
       });
     });
 
@@ -103,6 +112,7 @@ export function generateResponseDTO(
         config,
         depth,
         modelsMap,
+        dtoType: "response",
       }) as any,
     });
   });

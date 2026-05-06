@@ -101,7 +101,13 @@ export function generateCreateDTO(
     sourceFile.addClass({
       name: `Create${model.name}Dto`,
       isExported: true,
-      properties: buildProperties({ model, modelsMap, config, depth }) as any,
+      properties: buildProperties({
+        model,
+        modelsMap,
+        config,
+        depth,
+        dtoType: "create",
+      }) as any,
     });
   });
 

@@ -9,11 +9,13 @@ export function buildProperties({
   modelsMap,
   config,
   depth,
+  dtoType,
 }: {
   model: ModelMeta;
   modelsMap: Map<string, ModelMeta>;
   config: any;
   depth: number;
+  dtoType: "create" | "response";
 }) {
   const modelConfig = config.models?.[model.name];
 
@@ -31,7 +33,16 @@ export function buildProperties({
       // 🔁 RELATION FIELD
       if (field.type === "relation") {
         const relatedModel = modelsMap.get(field.relation?.model!);
-        const relatedDto = `Create${field.relation?.model}Dto`;
+        const relatedDto =
+          dtoType === "response"
+            ? `${field.relation?.model}ResponseDto`
+            : `Create${field.relation?.model}Dto`;
+
+        if (!relatedModel) {
+          throw new Error(
+            `Related model "${field.relation?.model}" not found for field "${model.name}.${field.name}"`,
+          );
+        }
 
         return {
           kind: StructureKind.Property,
@@ -48,8 +59,12 @@ export function buildProperties({
               arguments: [`() => ${relatedDto}`],
             },
             {
-              name: "ApiProperty",
-              arguments: field.isArray ? ["{ isArray: true }"] : [],
+              name: field.required ? "ApiProperty" : "ApiPropertyOptional",
+              arguments: [
+                field.isArray
+                  ? `{ type: () => ${relatedDto}, isArray: true }`
+                  : `{ type: () => ${relatedDto} }`,
+              ],
             },
           ],
         };

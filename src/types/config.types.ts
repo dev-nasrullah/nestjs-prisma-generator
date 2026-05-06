@@ -11,11 +11,16 @@ export interface FieldConfig {
   writeOnly?: boolean;
 }
 
+export interface RelationConfig {
+  mode?: "id" | "object";
+  depth?: number;
+}
+
 export interface ModelConfig {
   exclude?: string[];
   rename?: Record<string, string>;
-
   fields?: Record<string, FieldConfig>;
+  relations?: RelationConfig;
 }
 
 export interface GeneratorConfig {
