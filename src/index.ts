@@ -1,5 +1,6 @@
 import { Command } from "commander";
-import { loadDMMF } from "./core/dmmf-loader";
+import path from "path";
+import { loadDMMF, loadSchema } from "./core/dmmf-loader";
 import { buildMetadata } from "./core/metadata-builder";
 import { loadConfig } from "./core/config-loader";
 import {
@@ -64,10 +65,14 @@ program
       console.log("👀 Watching for changes...");
 
       const chokidar = await import("chokidar");
+      const schema = await loadSchema(schemaPath);
 
-      const watcher = chokidar.watch(schemaPath, {
-        ignoreInitial: true,
-      });
+      const watcher = chokidar.watch(
+        path.join(schema.schemaRootDir, "**/*.prisma"),
+        {
+          ignoreInitial: true,
+        },
+      );
 
       watcher.on("change", async () => {
         console.log("🔄 Schema changed. Regenerating...");

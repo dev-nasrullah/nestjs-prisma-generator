@@ -3,13 +3,8 @@
 import { defineConfig } from "nestjs-prisma-generator/config";
 
 const config = {
-  schema: "prisma/schema.prisma",
+  schema: "prisma/schema.prisma", // Path to folder or file with Prisma schema(s)
   output: "generated",
-  models: {
-    User: {
-      exclude: ["password"],
-    },
-  },
 } satisfies NestjsPrismaConfig;
 
 export default defineConfig(config);

@@ -1,15 +1,22 @@
-import { getDMMF } from "@prisma/internals";
-import fs from "fs/promises";
+import { getDMMF, getSchemaWithPath, GetSchemaResult } from "@prisma/internals";
 import path from "path";
 
-export async function loadDMMF(schemaPath?: string) {
+export async function loadSchema(schemaPath?: string): Promise<GetSchemaResult> {
   const resolvedPath =
     schemaPath || path.join(process.cwd(), "prisma/schema.prisma");
 
-  const schema = await fs.readFile(resolvedPath, "utf-8");
+  return getSchemaWithPath({
+    schemaPath: {
+      cliProvidedPath: resolvedPath,
+    },
+  });
+}
+
+export async function loadDMMF(schemaPath?: string) {
+  const schema = await loadSchema(schemaPath);
 
   const dmmf = await getDMMF({
-    datamodel: schema,
+    datamodel: schema.schemas,
   });
 
   return dmmf;
