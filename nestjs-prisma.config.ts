@@ -2,13 +2,14 @@
 
 import { defineConfig } from "nestjs-prisma-generator/config";
 
-export default defineConfig<NestjsPrismaSchema>({
-  output: {
-    base: "generated",
-  },
+const config = {
+  schema: "prisma/schema.prisma",
+  output: "generated",
   models: {
     User: {
       exclude: ["password"],
     },
   },
-});
+} satisfies NestjsPrismaConfig;
+
+export default defineConfig(config);

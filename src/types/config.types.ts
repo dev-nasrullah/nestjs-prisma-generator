@@ -24,9 +24,12 @@ export interface ModelConfig<FieldName extends string = string> {
 }
 
 export interface GeneratorConfig {
-  output?: {
-    base?: string;
-  };
+  schema?: string;
+  output?:
+    | string
+    | {
+        base?: string;
+      };
 
   models?: Record<string, ModelConfig>;
 }

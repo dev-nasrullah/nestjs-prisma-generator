@@ -2,6 +2,10 @@ import { Command } from "commander";
 import { loadDMMF } from "./core/dmmf-loader";
 import { buildMetadata } from "./core/metadata-builder";
 import { loadConfig } from "./core/config-loader";
+import {
+  resolveOutputPath,
+  resolveSchemaPath,
+} from "./core/config-resolver";
 
 import { generateEnums } from "./generators/enum.generator";
 import { generateCreateDTO } from "./generators/create-dto.generator";
@@ -18,14 +22,18 @@ program
 
 program
   .command("generate")
-  .option("-o, --output <path>", "Output directory", "src/generated")
+  .option("-s, --schema <path>", "Prisma schema path")
+  .option("-o, --output <path>", "Output directory")
   .option("-m, --models <models>", "Comma separated model names")
   .option("-w, --watch", "Watch schema and regenerate")
   .action(async (options) => {
+    const config = await loadConfig();
+    const schemaPath = resolveSchemaPath(options.schema, config);
+    const outputPath = resolveOutputPath(options.output, config);
+
     const run = async () => {
-      const dmmf = await loadDMMF();
+      const dmmf = await loadDMMF(schemaPath);
       generateConfigTypes(dmmf);
-      const config = await loadConfig();
 
       const meta = buildMetadata(dmmf, config);
 
@@ -41,10 +49,10 @@ program
         `Generating DTOs for: ${models.map((m) => m.name).join(", ")}`,
       );
 
-      generateEnums(meta.enums, options.output);
-      generateCreateDTO(models, options.output, config);
-      generateUpdateDTO(models, options.output);
-      generateResponseDTO(models, options.output, config);
+      generateEnums(meta.enums, outputPath);
+      generateCreateDTO(models, outputPath, config);
+      generateUpdateDTO(models, outputPath);
+      generateResponseDTO(models, outputPath, config);
 
       console.log("✅ Generation complete");
     };
@@ -57,7 +65,7 @@ program
 
       const chokidar = await import("chokidar");
 
-      const watcher = chokidar.watch("prisma/schema.prisma", {
+      const watcher = chokidar.watch(schemaPath, {
         ignoreInitial: true,
       });
 
