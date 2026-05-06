@@ -1,6 +1,7 @@
 {
   "name": "nestjs-prisma-generator",
   "version": "0.0.1",
+  "description": "Generate NestJS DTOs and Swagger metadata from single-file or multi-file Prisma schemas.",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
@@ -16,23 +17,40 @@
       "import": "./dist/config.mjs"
     }
   },
-  "description": "NestJS Prisma Generator is a powerful code generation tool designed to streamline the development process for NestJS applications that utilize Prisma as their ORM. It automates the creation of boilerplate code, such as DTOs, services, and controllers, based on your Prisma schema. This allows developers to focus on implementing business logic rather than writing repetitive code, ultimately accelerating the development workflow and improving productivity.",
   "bin": {
     "nestjs-prisma-gen": "bin/nestjs-prisma-gen.js"
   },
   "scripts": {
     "build": "tsup",
     "dev": "ts-node src/index.ts",
-    "prepare": "npm run build"
+    "prepare": "npm run build",
+    "prepublishOnly": "npm run build"
   },
   "files": [
     "dist",
-    "bin"
+    "bin",
+    "README.md",
+    "LICENSE"
   ],
-  "keywords": [],
+  "keywords": [
+    "nestjs",
+    "prisma",
+    "dto",
+    "swagger",
+    "generator",
+    "openapi",
+    "codegen"
+  ],
   "author": "Nasrullah",
   "license": "MIT",
   "type": "commonjs",
+  "sideEffects": false,
+  "engines": {
+    "node": ">=18"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "dependencies": {
     "@nestjs/mapped-types": "^2.1.1",
     "@prisma/internals": "^7.8.0",
