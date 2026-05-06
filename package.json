@@ -16,7 +16,7 @@
       "import": "./dist/config.mjs"
     }
   },
-  "description": "",
+  "description": "NestJS Prisma Generator is a powerful code generation tool designed to streamline the development process for NestJS applications that utilize Prisma as their ORM. It automates the creation of boilerplate code, such as DTOs, services, and controllers, based on your Prisma schema. This allows developers to focus on implementing business logic rather than writing repetitive code, ultimately accelerating the development workflow and improving productivity.",
   "bin": {
     "nestjs-prisma-gen": "bin/nestjs-prisma-gen.js"
   },
@@ -30,8 +30,8 @@
     "bin"
   ],
   "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "author": "Nasrullah",
+  "license": "MIT",
   "type": "commonjs",
   "dependencies": {
     "@nestjs/mapped-types": "^2.1.1",
