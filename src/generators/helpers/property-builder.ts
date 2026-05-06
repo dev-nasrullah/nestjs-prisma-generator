@@ -3,19 +3,24 @@ import { shouldIncludeRelation } from "../../core/relation-resolver";
 import { ModelMeta } from "../../types/metadata.types";
 import { mapTsType } from "../../utils/map-ts-type.util";
 import { buildDecorators } from "../../utils/build-decorator.util";
+import {
+  DtoType,
+  getDtoClassName,
+  getLoaderName,
+} from "./relation-dto.util";
 
 export function buildProperties({
   model,
   modelsMap,
   config,
-  depth,
+  currentDepth,
   dtoType,
 }: {
   model: ModelMeta;
   modelsMap: Map<string, ModelMeta>;
   config: any;
-  depth: number;
-  dtoType: "create" | "response";
+  currentDepth: number;
+  dtoType: DtoType;
 }) {
   const modelConfig = config.models?.[model.name];
 
@@ -24,7 +29,7 @@ export function buildProperties({
       if (f.isId) return false;
 
       if (f.type === "relation") {
-        return shouldIncludeRelation(f, modelConfig, depth);
+        return shouldIncludeRelation(f, modelConfig, currentDepth);
       }
 
       return true;
@@ -33,10 +38,12 @@ export function buildProperties({
       // 🔁 RELATION FIELD
       if (field.type === "relation") {
         const relatedModel = modelsMap.get(field.relation?.model!);
-        const relatedDto =
-          dtoType === "response"
-            ? `${field.relation?.model}ResponseDto`
-            : `Create${field.relation?.model}Dto`;
+        const relatedDto = getDtoClassName(
+          field.relation?.model!,
+          dtoType,
+          currentDepth + 1,
+        );
+        const loaderName = getLoaderName(relatedDto);
 
         if (!relatedModel) {
           throw new Error(
@@ -56,14 +63,14 @@ export function buildProperties({
             },
             {
               name: "Type",
-              arguments: [`() => ${relatedDto}`],
+              arguments: [`() => ${loaderName}()`],
             },
             {
               name: field.required ? "ApiProperty" : "ApiPropertyOptional",
               arguments: [
                 field.isArray
-                  ? `{ type: () => ${relatedDto}, isArray: true }`
-                  : `{ type: () => ${relatedDto} }`,
+                  ? `{ type: () => ${loaderName}(), isArray: true }`
+                  : `{ type: () => ${loaderName}() }`,
               ],
             },
           ],

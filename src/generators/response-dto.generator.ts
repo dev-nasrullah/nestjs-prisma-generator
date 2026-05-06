@@ -2,23 +2,33 @@ import { Project } from "ts-morph";
 import path from "path";
 import fs from "fs";
 import { ModelMeta } from "../types/metadata.types";
-import { shouldIncludeRelation } from "../core/relation-resolver";
+import {
+  getRelationDepth,
+  shouldIncludeRelation,
+} from "../core/relation-resolver";
 import { GeneratorConfig } from "../types/config.types";
 import { buildProperties } from "./helpers/property-builder";
+import {
+  getDtoClassName,
+  getDtoModuleSpecifier,
+  getLoaderName,
+} from "./helpers/relation-dto.util";
 
 export function generateResponseDTO(
   models: ModelMeta[],
   outputDir: string,
   config: GeneratorConfig,
-  depth = 0,
 ) {
   const project = new Project();
 
   const modelsMap = new Map(models.map((m) => [m.name, m]));
+  const maxRelationDepth = Math.max(
+    1,
+    ...models.map((model) => getRelationDepth(config.models?.[model.name])),
+  );
 
   models.forEach((model) => {
     const folder = path.join(outputDir, model.name.toLowerCase());
-
     const filePath = path.join(
       folder,
       `${model.name.toLowerCase()}.response.dto.ts`,
@@ -30,7 +40,6 @@ export function generateResponseDTO(
       overwrite: true,
     });
 
-    // imports
     sourceFile.addImportDeclarations([
       {
         moduleSpecifier: "@nestjs/swagger",
@@ -45,76 +54,99 @@ export function generateResponseDTO(
           "IsDate",
           "IsOptional",
           "IsEnum",
+          "ValidateNested",
         ],
       },
       {
         moduleSpecifier: "class-transformer",
-        namedImports: ["Exclude"],
+        namedImports: ["Exclude", "Type"],
       },
     ]);
 
-    // enum imports
     const enumImports = new Set<string>();
-    model.fields.forEach((f) => {
-      if (f.type === "enum" && f.enumName) {
-        enumImports.add(f.enumName);
+    model.fields.forEach((field) => {
+      if (field.type === "enum" && field.enumName) {
+        enumImports.add(field.enumName);
       }
     });
 
     if (enumImports.size > 0) {
       sourceFile.addImportDeclaration({
-        moduleSpecifier: `../enums`,
+        moduleSpecifier: "../enums",
         namedImports: Array.from(enumImports),
       });
     }
 
-    const relationImports = new Set<string>();
     const modelConfig = config.models?.[model.name];
+    const relationImports = new Map<string, Set<string>>();
+    const relationLoaders = new Map<
+      string,
+      { className: string; moduleSpecifier: string }
+    >();
 
-    model.fields.forEach((f) => {
-      if (
-        f.type === "relation" &&
-        shouldIncludeRelation(f, modelConfig, depth)
-      ) {
-        relationImports.add(f.relation!.model);
-      }
-    });
+    for (let currentDepth = 0; currentDepth <= maxRelationDepth; currentDepth++) {
+      model.fields.forEach((field) => {
+        if (
+          field.type !== "relation" ||
+          !shouldIncludeRelation(field, modelConfig, currentDepth)
+        ) {
+          return;
+        }
 
-    relationImports.forEach((rel) => {
+        const className = getDtoClassName(
+          field.relation!.model,
+          "response",
+          currentDepth + 1,
+        );
+        const moduleSpecifier = getDtoModuleSpecifier(
+          field.relation!.model,
+          "response",
+        );
+
+        if (!relationImports.has(moduleSpecifier)) {
+          relationImports.set(moduleSpecifier, new Set<string>());
+        }
+
+        relationImports.get(moduleSpecifier)!.add(className);
+        relationLoaders.set(className, { className, moduleSpecifier });
+      });
+    }
+
+    relationImports.forEach((classNames, moduleSpecifier) => {
       sourceFile.addImportDeclaration({
-        moduleSpecifier: `../${rel.toLowerCase()}/${rel.toLowerCase()}.response.dto`,
-        namedImports: [`${rel}ResponseDto`],
+        moduleSpecifier,
+        namedImports: Array.from(classNames),
+        isTypeOnly: true,
       });
     });
 
-    sourceFile.addImportDeclaration({
-      moduleSpecifier: "class-validator",
-      namedImports: ["ValidateNested"],
+    relationLoaders.forEach(({ className, moduleSpecifier }) => {
+      sourceFile.addFunction({
+        name: getLoaderName(className),
+        returnType: `typeof import("${moduleSpecifier}").${className}`,
+        statements: [`return require("${moduleSpecifier}").${className};`],
+      });
     });
 
-    sourceFile.addImportDeclaration({
-      moduleSpecifier: "class-transformer",
-      namedImports: ["Type"],
-    });
-
-    // class
-    sourceFile.addClass({
-      name: `${model.name}ResponseDto`,
-      isExported: true,
-      decorators: [
-        {
-          name: "Exclude",
-          arguments: [],
-        },
-      ],
-      properties: buildProperties({
-        model,
-        config,
-        depth,
-        modelsMap,
-        dtoType: "response",
-      }) as any,
-    });
+    for (let currentDepth = 0; currentDepth <= maxRelationDepth; currentDepth++) {
+      sourceFile.addClass({
+        name: getDtoClassName(model.name, "response", currentDepth),
+        isExported: true,
+        decorators: [
+          {
+            name: "Exclude",
+            arguments: [],
+          },
+        ],
+        properties: buildProperties({
+          model,
+          config,
+          currentDepth,
+          modelsMap,
+          dtoType: "response",
+        }) as any,
+      });
+    }
   });
 
   project.saveSync();
