@@ -4,6 +4,18 @@
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "require": "./dist/index.js",
+      "import": "./dist/index.mjs"
+    },
+    "./config": {
+      "types": "./dist/config.d.ts",
+      "require": "./dist/config.js",
+      "import": "./dist/config.mjs"
+    }
+  },
   "description": "",
   "bin": {
     "nestjs-prisma-gen": "bin/nestjs-prisma-gen.js"

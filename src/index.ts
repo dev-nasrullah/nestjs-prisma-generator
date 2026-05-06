@@ -7,6 +7,7 @@ import { generateEnums } from "./generators/enum.generator";
 import { generateCreateDTO } from "./generators/create-dto.generator";
 import { generateUpdateDTO } from "./generators/update-dto.generator";
 import { generateResponseDTO } from "./generators/response-dto.generator";
+import { generateConfigTypes } from "./generators/config-types.generator";
 
 const program = new Command();
 
@@ -23,6 +24,7 @@ program
   .action(async (options) => {
     const run = async () => {
       const dmmf = await loadDMMF();
+      generateConfigTypes(dmmf);
       const config = await loadConfig();
 
       const meta = buildMetadata(dmmf, config);

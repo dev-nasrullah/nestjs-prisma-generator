@@ -16,10 +16,10 @@ export interface RelationConfig {
   depth?: number;
 }
 
-export interface ModelConfig {
-  exclude?: string[];
-  rename?: Record<string, string>;
-  fields?: Record<string, FieldConfig>;
+export interface ModelConfig<FieldName extends string = string> {
+  exclude?: FieldName[];
+  rename?: Partial<Record<FieldName, string>>;
+  fields?: Partial<Record<FieldName, FieldConfig>>;
   relations?: RelationConfig;
 }
 
@@ -30,3 +30,21 @@ export interface GeneratorConfig {
 
   models?: Record<string, ModelConfig>;
 }
+
+export type PrismaSchemaShape = Record<string, string>;
+
+export type SchemaAwareModelConfig<FieldName extends string> = Omit<
+  ModelConfig<FieldName>,
+  "exclude"
+> & {
+  exclude?: FieldName[];
+};
+
+export type GeneratorConfigForSchema<TSchema extends PrismaSchemaShape> = Omit<
+  GeneratorConfig,
+  "models"
+> & {
+  models?: Partial<{
+    [ModelName in keyof TSchema]: SchemaAwareModelConfig<TSchema[ModelName] & string>;
+  }>;
+};
