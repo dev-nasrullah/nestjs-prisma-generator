@@ -54,6 +54,7 @@
   "dependencies": {
     "@prisma/internals": "^7.8.0",
     "commander": "^14.0.3",
+    "ts-node": "^10.9.2",
     "ts-morph": "^28.0.0"
   },
   "peerDependencies": {
@@ -63,7 +64,6 @@
   },
   "devDependencies": {
     "@types/node": "^25.6.0",
-    "ts-node": "^10.9.2",
     "tsup": "^8.5.1",
     "typescript": "^6.0.3"
   }
