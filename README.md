@@ -1,4 +1,4 @@
-# nestjs-prisma-generator
+# @nasrullah02/nestjs-prisma-generator
 
 Generate NestJS DTOs and Swagger metadata from a Prisma schema.
 
@@ -20,7 +20,7 @@ It supports:
 ## Install
 
 ```bash
-npm install nestjs-prisma-generator
+npm install @nasrullah02/nestjs-prisma-generator
 ```
 
 You also need a Prisma schema in your project.
@@ -54,7 +54,7 @@ Create a config file in your project root:
 ```ts
 /// <reference path="./nestjs-prisma.config.d.ts" />
 
-import { defineConfig } from "nestjs-prisma-generator/config";
+import { defineConfig } from "@nasrullah02/nestjs-prisma-generator/config";
 
 const config = {
   schema: "prisma/schema.prisma",
@@ -206,7 +206,7 @@ This prevents:
 ## Config Reference
 
 ```ts
-import { defineConfig } from "nestjs-prisma-generator/config";
+import { defineConfig } from "@nasrullah02/nestjs-prisma-generator/config";
 
 const config = {
   schema: "prisma/schema.prisma",

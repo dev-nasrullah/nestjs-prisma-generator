@@ -1,6 +1,6 @@
 /// <reference path="./nestjs-prisma.config.d.ts" />
 
-import { defineConfig } from "nestjs-prisma-generator/config";
+import { defineConfig } from "@nasrullah02/nestjs-prisma-generator/config";
 
 const config = {
   schema: "prisma/schema.prisma", // Path to folder or file with Prisma schema(s)

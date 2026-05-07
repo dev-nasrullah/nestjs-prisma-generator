@@ -1,4 +1,4 @@
-import type { GeneratorConfigForSchema } from "nestjs-prisma-generator/config";
+import type { GeneratorConfigForSchema } from "@nasrullah02/nestjs-prisma-generator/config";
 
 declare global {
   type NestjsPrismaSchema = {

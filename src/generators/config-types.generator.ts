@@ -23,7 +23,7 @@ ${dmmf.datamodel.models
   .join("\n")}
 }`;
 
-  const content = `import type { GeneratorConfigForSchema } from "nestjs-prisma-generator/config";
+  const content = `import type { GeneratorConfigForSchema } from "@nasrullah02/nestjs-prisma-generator/config";
 
 declare global {
   type NestjsPrismaSchema = ${schemaShape};
