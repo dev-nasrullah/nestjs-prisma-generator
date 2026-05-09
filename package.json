@@ -1,6 +1,6 @@
 {
   "name": "@nasrullah02/nestjs-prisma-generator",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "description": "Generate NestJS DTOs and Swagger metadata from single-file or multi-file Prisma schemas.",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
@@ -66,5 +66,9 @@
     "@types/node": "^25.6.0",
     "tsup": "^8.5.1",
     "typescript": "^6.0.3"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dev-nasrullah/nestjs-prisma-generator"
   }
 }
